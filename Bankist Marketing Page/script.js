@@ -159,7 +159,7 @@ const navHeight = nav.getBoundingClientRect().height;
 const headerObsOptions = {
   root: null, // the root is the element the target is intercepting
   threshold: 0, // the % of interception at which the callback will be called
-  rootMargin: `-${navHeight}px`, // make the element appear 90 px before the threshold is reached
+  rootMargin: `-${navHeight}px`, // make the element appear the height of the navbar px before the threshold is reached
 };
 
 const stickyNav = function (entries) {
