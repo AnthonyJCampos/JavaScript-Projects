@@ -153,3 +153,20 @@ window.addEventListener('scroll', function (event) {
   }
 });
 */
+
+const header = document.querySelector('.header');
+const obsOptions = {
+  root: null, // the root is the element the target is intercepting
+  threshold: 0, // the % of interception at which the callback will be called
+};
+
+const stickyNav = function (entries) {
+  const [entry] = entries;
+
+  !entry.isIntersecting
+    ? nav.classList.add('sticky')
+    : nav.classList.remove('sticky');
+};
+
+const headerObserver = new IntersectionObserver(stickyNav, obsOptions);
+headerObserver.observe(header);
