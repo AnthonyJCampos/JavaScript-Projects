@@ -155,9 +155,11 @@ window.addEventListener('scroll', function (event) {
 */
 
 const header = document.querySelector('.header');
-const obsOptions = {
+const navHeight = nav.getBoundingClientRect().height;
+const headerObsOptions = {
   root: null, // the root is the element the target is intercepting
   threshold: 0, // the % of interception at which the callback will be called
+  rootMargin: `-${navHeight}px`, // make the element appear 90 px before the threshold is reached
 };
 
 const stickyNav = function (entries) {
@@ -168,5 +170,5 @@ const stickyNav = function (entries) {
     : nav.classList.remove('sticky');
 };
 
-const headerObserver = new IntersectionObserver(stickyNav, obsOptions);
+const headerObserver = new IntersectionObserver(stickyNav, headerObsOptions);
 headerObserver.observe(header);
