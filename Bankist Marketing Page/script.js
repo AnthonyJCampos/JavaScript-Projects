@@ -156,11 +156,6 @@ window.addEventListener('scroll', function (event) {
 
 const header = document.querySelector('.header');
 const navHeight = nav.getBoundingClientRect().height;
-const headerObsOptions = {
-  root: null, // the root is the element the target is intercepting
-  threshold: 0, // the % of interception at which the callback will be called
-  rootMargin: `-${navHeight}px`, // make the element appear the height of the navbar px before the threshold is reached
-};
 
 const stickyNav = function (entries) {
   const [entry] = entries;
@@ -168,7 +163,136 @@ const stickyNav = function (entries) {
   !entry.isIntersecting
     ? nav.classList.add('sticky')
     : nav.classList.remove('sticky');
+}; // end stickyNav
+
+const headerObsOptions = {
+  root: null, // the root is the element the target is intercepting
+  threshold: 0, // the % of interception at which the callback will be called
+  rootMargin: `-${navHeight}px`, // make the element appear the height of the navbar px before the threshold is reached
 };
 
 const headerObserver = new IntersectionObserver(stickyNav, headerObsOptions);
 headerObserver.observe(header);
+
+// Reveal Sections
+
+const allSections = document.querySelectorAll('.section');
+
+const sectionObsOptions = {
+  root: null,
+  threshold: 0.15,
+};
+const revealSection = function (entries, observer) {
+  const [entry] = entries; // use destructing
+  // base case
+  if (!entry.isIntersecting) {
+    return;
+  } // end if
+  // use the target prop of the entry toremove the hidden CSS class
+  entry.target.classList.remove('section--hidden');
+  observer.unobserve(entry.target);
+}; // end revealSection
+
+const sectionObserver = new IntersectionObserver(
+  revealSection,
+  sectionObsOptions
+);
+
+allSections.forEach(function (section) {
+  sectionObserver.observe(section);
+  section.classList.add('section--hidden');
+});
+
+/** Lazy Loading Images */
+
+const imgTargets = document.querySelectorAll('img[data-src]');
+
+const loadImg = function (entries, observer) {
+  const [entry] = entries;
+
+  // base case
+  if (!entry.isIntersecting) {
+    return;
+  } // end if
+
+  // Replace src with data-src on img element
+  entry.target.src = entry.target.dataset.src;
+
+  // when loading is complete remove the blur effect
+  entry.target.addEventListener('load', function () {
+    entry.target.classList.remove('lazy-img');
+  });
+
+  // we not longer need to watch the current element as it has loaded
+  observer.unobserve(entry.target);
+}; // end loadingImg
+
+const imgObOptions = {
+  root: null,
+  threshold: 0,
+  rootMargin: '200px',
+};
+
+const imgObserver = new IntersectionObserver(loadImg, imgObOptions);
+imgTargets.forEach(img => imgObserver.observe(img));
+
+/** SLider */
+
+const slides = document.querySelectorAll('.slide');
+const btnLeft = document.querySelector('.slider__btn--left');
+const btnRight = document.querySelector('.slider__btn--right');
+const dotContainer = document.querySelector('.dots');
+
+let curSlide = 0;
+const maxSlide = slides.length;
+
+const creatDots = function () {
+  slides.forEach(function (_, index) {
+    dotContainer.insertAdjacentHTML(
+      'beforeend',
+      `<button class="dots__dot" data-slide="${index}"></button`
+    );
+  });
+};
+
+creatDots();
+
+// event deligation
+
+dotContainer.addEventListener('click', function (event) {
+  if (event.target.classList.contains('dots__dot')) {
+    // use destructing
+    const { slide } = event.target.dataset;
+    goToSlide(slide);
+  } // end if
+});
+
+const goToSlide = function (pos) {
+  slides.forEach(
+    (slide, index) =>
+      (slide.style.transform = `translateX(${100 * (index - pos)}%)`)
+  );
+};
+
+goToSlide(0);
+const nextSlide = function () {
+  curSlide === maxSlide - 1 ? (curSlide = 0) : curSlide++;
+  goToSlide(curSlide);
+};
+
+// next slide
+btnRight.addEventListener('click', nextSlide);
+// keyboard event
+document.addEventListener('keydown', function (event) {
+  // using short circuit
+  event.key === 'ArrowRight' && nextSlide();
+  event.key === 'ArrowLeft' && prevSlide();
+});
+
+// prev slide
+const prevSlide = function () {
+  curSlide === 0 ? (curSlide = maxSlide - 1) : curSlide--;
+  goToSlide(curSlide);
+};
+
+btnLeft.addEventListener('click', prevSlide);
