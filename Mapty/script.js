@@ -15,8 +15,17 @@ const inputElevation = document.querySelector('.form__input--elevation');
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     function (position) {
-      const { latitude } = position.coords;
-      const { longitude } = position.coords;
+      const { latitude, longitude } = position.coords;
+      const coords = [latitude, longitude];
+      const map = L.map('map').setView(coords, 13);
+      L.tileLayer(
+        'http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga'
+      ).addTo(map);
+
+      L.marker(coords)
+        .addTo(map)
+        .bindPopup(`Anthony & Marissa's House`)
+        .openPopup();
     },
     function () {
       alert('Position API Error');
