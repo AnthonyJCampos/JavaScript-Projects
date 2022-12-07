@@ -18,14 +18,27 @@ if (navigator.geolocation) {
       const { latitude, longitude } = position.coords;
       const coords = [latitude, longitude];
       const map = L.map('map').setView(coords, 13);
-      L.tileLayer(
-        'http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga'
-      ).addTo(map);
+      L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
 
-      L.marker(coords)
-        .addTo(map)
-        .bindPopup(`Anthony & Marissa's House`)
-        .openPopup();
+      map.on('click', function (mapEvent) {
+        const { lat, lng } = mapEvent.latlng;
+        const options = {
+          maxWidth: 250,
+          minWidth: 100,
+          autoClose: false,
+          closeOnClick: false,
+          className: 'running-popup',
+        };
+
+        L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(L.popup(options))
+          .setPopupContent('workout')
+          .openPopup();
+      });
     },
     function () {
       alert('Position API Error');
