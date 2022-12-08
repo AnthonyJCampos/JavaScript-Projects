@@ -175,10 +175,10 @@ class App {
     // Render workout on list
     this._renderWorkoutMarker(workout);
     // Hide form & clear  inpout fields
-
-    // Display Marker
-
     this._hideForm();
+
+    // Set local Storage to all workouts
+    this._setLocalStorage();
   } // end _newWorkout
 
   _renderWorkoutMarker(workout) {
@@ -265,6 +265,10 @@ class App {
     };
     this.#map.setView(workout.coords, this.#mapZoomLevel, options);
   } // end moveToPopup
+
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  } // end _setLocalStorage
 } // end App
 
 const app = new App();
