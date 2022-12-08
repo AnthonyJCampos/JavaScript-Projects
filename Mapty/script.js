@@ -64,6 +64,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 class App {
   // private class fields
   #map;
+  #mapZoomLevel = 13;
   #mapEvent;
   #workouts = [];
 
@@ -73,6 +74,8 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
 
     inputType.addEventListener('change', this._toggleElevationField);
+
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
   _getPosition() {
@@ -93,7 +96,7 @@ class App {
   _loadMap(position) {
     const { latitude, longitude } = position.coords;
     const coords = [latitude, longitude];
-    this.#map = L.map('map').setView(coords, 13);
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -108,6 +111,18 @@ class App {
     form.classList.remove('hidden');
     inputDistance.focus();
   }
+
+  _hideForm() {
+    // Clear Input Fields
+    inputDistance.value = '';
+    inputDuration.value = '';
+    inputElevation.value = '';
+    inputCadence.value = '';
+
+    form.style.display = 'none';
+    form.classList.add('hidden');
+    setTimeout(() => (form.style.display = 'grid'), 1000);
+  } // end _hideForm
 
   _toggleElevationField() {
     inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
@@ -161,12 +176,9 @@ class App {
     this._renderWorkoutMarker(workout);
     // Hide form & clear  inpout fields
 
-    // Clear Input Fields
-    inputDistance.value = '';
-    inputDuration.value = '';
-    inputElevation.value = '';
-    inputCadence.value = '';
     // Display Marker
+
+    this._hideForm();
   } // end _newWorkout
 
   _renderWorkoutMarker(workout) {
@@ -181,13 +193,13 @@ class App {
     L.marker(workout.coords)
       .addTo(this.#map)
       .bindPopup(L.popup(options))
-      .setPopupContent('workout')
+      .setPopupContent(
+        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
+      )
       .openPopup();
   } // end renderWorkoutMarker
 
   _renderWorkout(workout) {
-    console.log(workout);
-
     let html = `<li class="workout workout--${workout.type}" data-id="${
       workout.id
     }">
@@ -233,7 +245,26 @@ class App {
     } // end if
 
     form.insertAdjacentHTML('afterend', html);
-  }
+  } // end of _renderWorkout
+
+  _moveToPopup(event) {
+    const workoutEl = event.target.closest('.workout');
+    // guard
+    if (!workoutEl) {
+      return;
+    }
+
+    const workout = this.#workouts.find(
+      workout => workout.id === workoutEl.dataset.id
+    );
+    const options = {
+      animate: true,
+      pan: {
+        duraction: 1,
+      },
+    };
+    this.#map.setView(workout.coords, this.#mapZoomLevel, options);
+  } // end moveToPopup
 } // end App
 
 const app = new App();
