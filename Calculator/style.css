@@ -54,10 +54,16 @@ main {
   justify-content: center;
 }
 
-.calc__text {
-  display: inline-block;
+.calc__prev__text {
   height: fit-content;
-  padding: 10px;
+  padding: 5px 10px 0 10px;
+  text-align: right;
+  font-size: 18px;
+}
+
+.calc__text {
+  height: fit-content;
+  padding: 5px 10px 0 10px;
   text-align: right;
   font-size: 50px;
 }
