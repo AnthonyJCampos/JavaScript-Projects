@@ -11,9 +11,19 @@ calcPad.addEventListener("click", function (event) {
 class calculator {
   constructor() {}
 
-  _getCalcPadInput() {
-    calcPad.addEventListener("click", function (event) {
-      calcDisplay.textContent = event.target.value;
-    });
-  }
+  _getCalcPadInput() {}
+
+  _processBtnInput() {}
+
+  _processKeyInput() {}
+
+  _iskeyValid() {}
+
+  _inputDelegatory() {}
+
+  _storeOperator() {}
+
+  _calcInput() {}
+
+  _updateDisplayInput() {}
 } // end of calculator
