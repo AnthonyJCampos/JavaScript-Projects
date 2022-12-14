@@ -3,6 +3,7 @@
 /** Application  Architecture*/
 
 const calcDisplay = document.querySelector(".calc__text");
+const calcDisplayPrev = document.querySelector("calc__prev__text");
 const calcPad = document.querySelector(".calc__pad");
 
 class calculator {
@@ -38,24 +39,34 @@ class calculator {
   }
 
   _inputDelegatory(inputVal) {
+    const operators = ["/", "*", "-", "+"];
     // check if button pressed is a number
-    if (isFinite(inputVal)) {
-      // first check value currently in display
-      let curVal = calcDisplay.textContent;
-      // if zero replace
-      if (Number(curVal) === 0) {
-        curVal = inputVal;
-      } else if (Number(curVal) !== 0) {
-        curVal += inputVal;
-      }
-      calcDisplay.textContent = curVal;
+    if (isFinite(inputVal) || inputVal === ".") {
+      const curVal = calcDisplay.textContent;
+      calcDisplay.textContent = this._validateOprend(curVal, inputVal);
       // set the value in the calcDisplay
     } else {
       // process operator or cmd
     }
   }
 
-  _commandMap(inputVal) {
+  _validateOprend(val, inputVal) {
+    if (val === "0" && inputVal !== ".") {
+      return (val = inputVal);
+    }
+
+    if (inputVal === "." && !val.includes(".")) {
+      return (val += inputVal);
+    }
+
+    if (inputVal !== ".") {
+      return (val += inputVal);
+    }
+
+    return val;
+  } // end
+
+  commandMap(inputVal) {
     const cmdMap = new Map(
       ["clear all", this._clearAll],
       ["clear", this._clear]
@@ -69,6 +80,7 @@ class calculator {
 
   _clear() {
     calcDisplay.textContent = 0;
+    calcDisplayPrev.textContent = 0;
   }
   _clearAll() {}
 
