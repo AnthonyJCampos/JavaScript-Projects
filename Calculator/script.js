@@ -3,7 +3,7 @@
 /** Application  Architecture*/
 
 const calcDisplay = document.querySelector(".calc__text");
-const calcDisplayPrev = document.querySelector("calc__prev__text");
+const calcDisplayPrev = document.querySelector(".calc__prev__text");
 const calcPad = document.querySelector(".calc__pad");
 
 class calculator {
@@ -11,6 +11,8 @@ class calculator {
   #curExpression;
   #calcResult;
   #calcHistory = [];
+  #cmdMap = new Map([["clear", this._clear]]);
+
   constructor() {
     this._getInput();
   }
@@ -40,13 +42,13 @@ class calculator {
 
   _inputDelegatory(inputVal) {
     const operators = ["/", "*", "-", "+"];
-    // check if button pressed is a number
+    // check if button pressed is a number or decimal
     if (isFinite(inputVal) || inputVal === ".") {
       const curVal = calcDisplay.textContent;
       calcDisplay.textContent = this._validateOprend(curVal, inputVal);
       // set the value in the calcDisplay
     } else {
-      // process operator or cmd
+      this._commandMap(inputVal);
     }
   }
 
@@ -66,13 +68,8 @@ class calculator {
     return val;
   } // end
 
-  commandMap(inputVal) {
-    const cmdMap = new Map(
-      ["clear all", this._clearAll],
-      ["clear", this._clear]
-    );
-
-    const cmd = cmdMap.get(inputVal);
+  _commandMap(inputVal) {
+    this.#cmdMap.get(inputVal)();
   }
   _storeOperator() {}
 
@@ -80,7 +77,7 @@ class calculator {
 
   _clear() {
     calcDisplay.textContent = 0;
-    calcDisplayPrev.textContent = 0;
+    calcDisplayPrev.textContent = "";
   }
   _clearAll() {}
 
