@@ -11,7 +11,10 @@ class calculator {
   #curExpression;
   #calcResult;
   #calcHistory = [];
-  #cmdMap = new Map([["clear", this._clear]]);
+  #cmdMap = new Map([
+    ["clear", this._clear],
+    ["clear entry", this._clearEntry],
+  ]);
 
   constructor() {
     this._getInput();
@@ -79,7 +82,9 @@ class calculator {
     calcDisplay.textContent = 0;
     calcDisplayPrev.textContent = "";
   }
-  _clearAll() {}
+  _clearEntry() {
+    calcDisplay.textContent = 0;
+  }
 
   _updateDisplayInput() {}
 } // end of calculator
