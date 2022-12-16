@@ -10,6 +10,8 @@ class calculator {
   #curExpression = ["0"];
   #curExpPos = 0;
   #calcResult;
+  #leftOprendStack = [];
+  #rightOprendStack = [];
   #calcHistory = [];
   #cmdMap = new Map([
     ["clear", this._clear],
@@ -150,8 +152,20 @@ class calculator {
   }
 
   _calcSqrt() {
-    const result = Math.sqrt(this.#curExpression[this.#curExpPos]);
+    let result = this.#curExpression[this.#curExpPos];
+    if (this.#curExpPos === 0) {
+      this.#leftOprendStack.push("sqrt");
+      this.#leftOprendStack.forEach((action) => {
+        result = Math.sqrt(result);
+      });
+    } // end if
+
+    if (this.#curExpPos === 2) {
+      this.#rightOprendStack.push("sqrt");
+    } // end if
+
     this._updateDisplayInput(result);
+    this._updateDisplayExpress(this.#curExpression[this.#curExpPos]);
   }
 
   _clear() {
@@ -169,7 +183,22 @@ class calculator {
   }
 
   _updateDisplayExpress(input) {
-    calcDisplayExpress.textContent = input;
+    let output;
+    const build = (oprend, stack) => {
+      stack.forEach((action) => {
+        oprend = `${action}(${oprend})`;
+      });
+
+      return oprend;
+    };
+    if (this.#leftOprendStack.length !== 0) {
+      console.log(this.#leftOprendStack);
+      output = build(input, this.#leftOprendStack);
+    }
+
+    if (this.#rightOprendStack.length !== 0) {
+    }
+    calcDisplayExpress.textContent = output;
   }
 
   _addToHistry() {}
