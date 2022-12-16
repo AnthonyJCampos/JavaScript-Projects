@@ -62,18 +62,18 @@ class calculator {
       // set the value in the calcDisplay
     }
 
+    // && this._stackIsEmpty(this.#leftOprendStack) &&
+    // this._stackIsEmpty(this.#rightOprendStack)
+
     if (operators.includes(inputVal)) {
       // if calcResult has not been reset insert into left oprend
+
+      //console.log(`result ${this.#calcResult}`);
+
       if (this.#calcResult) {
         this.#curExpression[0] = this.#calcResult;
       } // end if
-      // if operator is 1st or 2nd input and is not already in expression
-      if (
-        !this._hasOperator(operators, inputVal) &&
-        this.#curExpression.length <= 2
-      ) {
-        this._processOprend(inputVal);
-      } // end if
+
       // if operator is 4th input process expression
       if (this.#curExpression.length === 3) {
         // we solve the expression using the command
@@ -83,13 +83,26 @@ class calculator {
         this._processOprend(inputVal);
       } // end if
 
+      // if operator is 1st or 2nd input and is not already in expression
+      if (
+        !this._hasOperator(operators, inputVal) &&
+        this.#curExpression.length <= 2
+      ) {
+        this._processOprend(inputVal);
+      } // end if
+
       // if prev el is operator ignore
     } // end if
 
     const specialOps = ["sqrt", "sqr", "inverse"];
     if (specialOps.includes(inputVal)) {
-      this._performSpecialOp(inputVal);
+      const [result, output] = this._performSpecialOp(inputVal);
+      this._updateDisplayInput(result);
+      this._output();
     }
+
+    // maybe update display here
+
     // we can just run the commmand at the end for now
     this._commandMap(inputVal);
   }
@@ -106,12 +119,40 @@ class calculator {
   _processOprend(inputVal) {
     this.#curExpression[++this.#curExpPos] = inputVal;
     // update current expression display
-    this._updateDisplayExpress(this.#curExpression.join(" "));
+    this._output();
     this.#curExpPos++;
     this.#curExpression[this.#curExpPos] = "0";
     this.#curExpPos = this.#curExpPos;
   }
 
+  _output() {
+    let output;
+    if (!this._leftStackIsEmpty()) {
+      output = this._buildSpecialExpress(
+        this.#leftOprendStack,
+        this.#curExpression[0]
+      );
+    } else {
+      output = this.#curExpression[0];
+    }
+
+    if (this.#curExpression.length >= 2) {
+      output += ` ${this.#curExpression[1]} `;
+    }
+
+    if (this.#curExpression.length === 3) {
+      if (!this._rightStackIsEmpty()) {
+        output += this._buildSpecialExpress(
+          this.#leftOprendStack,
+          this.#curExpression[0]
+        );
+      } else {
+        output += this.#curExpression[2];
+      } // end if
+    } // end if
+
+    this._updateDisplayExpress(output);
+  }
   _validateOprend(val, inputVal) {
     if (val === "0" && inputVal !== ".") {
       return (val = inputVal);
@@ -145,26 +186,65 @@ class calculator {
       ["/", bigDecimal.divide],
     ]);
     // index 1 should always be the operator
-    const [oprendL, operator, oprendR] = this.#curExpression;
+
+    // handle special cases
+    const [oprendL, oprendLText, operator, oprendR, oprendRText] =
+      this._determineExpression();
+    // compute results
     this.#calcResult = opMap.get(operator)(oprendL, oprendR);
+    // update result display field
     this._updateDisplayInput(this.#calcResult);
-    this._updateDisplayExpress(this.#curExpression.join(" ") + " =");
+    // construct output string expression
+    const output = `${oprendLText} ${operator} ${oprendRText} =`;
+    this._updateDisplayExpress(output);
+    // reset position, expression and stacks
     this.#curExpPos = 0;
     this.#curExpression = ["0"];
+    this.#leftOprendStack = [];
+    this.#rightOprendStack = [];
     // after getting results store in history
+  }
+
+  _determineExpression() {
+    let [oprendL, operator, oprendR] = this.#curExpression;
+    let oprendLText, oprendRText;
+    if (!this._leftStackIsEmpty()) {
+      oprendLText = this._buildSpecialExpress(this.#leftOprendStack, oprendL);
+      oprendL = this._computeSpecialOp(this.#leftOprendStack, oprendL);
+    } else {
+      oprendLText = oprendL;
+    }
+
+    if (!this._rightStackIsEmpty()) {
+      oprendRText = this._buildSpecialExpress(this.#rightOprendStack, oprendR);
+      oprendR = this._computeSpecialOp(this.#rightOprendStack, oprendR);
+    } else {
+      oprendRText = oprendR;
+    }
+
+    return [oprendL, oprendLText, operator, oprendR, oprendRText];
   }
 
   _performSpecialOp(inputVal) {
     let result;
+    let output;
     if (this.#curExpPos === 0) {
       result = this._computeSpecialOp(this.#leftOprendStack, inputVal);
+      output = this._buildSpecialExpress(
+        this.#leftOprendStack,
+        this.#curExpression[0]
+      );
     } // end if
 
     if (this.#curExpPos === 2) {
       result = this._computeSpecialOp(this.#rightOprendStack, inputVal);
+      output = this._buildSpecialExpress(
+        this.#rightOprendStack,
+        this.#curExpression[2]
+      );
     } // end if
-    this._updateDisplayInput(result);
-    this._updateDisplayExpress(this.#curExpression[this.#curExpPos]);
+
+    return [result, output];
   }
 
   _computeSpecialOp(stack, op) {
@@ -201,21 +281,9 @@ class calculator {
   }
 
   _updateDisplayExpress(input) {
-    let output;
-    if (this.#leftOprendStack.length !== 0) {
-      output = this._buildSpecialExpress(
-        this.#leftOprendStack,
-        this.#curExpression[0]
-      );
-    }
-
-    if (this.#rightOprendStack.length !== 0) {
-    }
-
-    calcDisplayExpress.textContent = output;
+    calcDisplayExpress.textContent = input;
   }
   _buildSpecialExpress(stack, oprend) {
-    console.log(`stack: ${stack}`);
     stack.forEach((action) => {
       oprend = `${action !== "inverse" ? action : "1/"}(${oprend})`;
     });
@@ -223,6 +291,20 @@ class calculator {
   }
 
   _addToHistry() {}
+
+  _leftStackIsEmpty() {
+    if (this.#leftOprendStack.length === 0) {
+      return true;
+    }
+    return false;
+  }
+
+  _rightStackIsEmpty() {
+    if (this.#rightOprendStack.length === 0) {
+      return true;
+    }
+    return false;
+  }
 } // end of calculator
 
 const calc = new calculator();
