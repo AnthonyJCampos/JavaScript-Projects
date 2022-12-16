@@ -7,7 +7,7 @@ const calcDisplayExpress = document.querySelector(".calc__prev__text");
 const calcPad = document.querySelector(".calc__pad");
 
 class calculator {
-  #curInput;
+  #curNum = "0";
   #curExpression = ["0"];
   #curExpPos = 0;
   #calcResult;
@@ -49,12 +49,9 @@ class calculator {
     const operators = ["/", "*", "-", "+"];
     // check if button pressed is a number or decimal
     if (isFinite(inputVal) || inputVal === ".") {
-      const curVal = this.#curExpression[this.#curExpPos];
-      this.#curExpression[this.#curExpPos] = this._validateOprend(
-        curVal,
-        inputVal
-      );
-      calcDisplay.textContent = this.#curExpression[this.#curExpPos];
+      this.#curNum = this._validateOprend(this.#curNum, inputVal);
+      console.log("inside number inputer", this.#curNum);
+      calcDisplay.textContent = this.#curNum;
       // set the value in the calcDisplay
     }
 
@@ -65,13 +62,17 @@ class calculator {
         !this._hasOperator(operators, inputVal) &&
         this.#curExpression.length <= 2
       ) {
-        let curPos = this.#curExpPos;
-        this.#curExpression[++curPos] = inputVal;
+        // set the left oprend
+        this.#curExpression[this.#curExpPos] = this.#curNum;
+        // reset the current number value
+        this.#curNum = "0";
+        // insert the operator into the expression, ahead of first value
+        this.#curExpression[++this.#curExpPos] = inputVal;
+        // update display
         calcDisplayExpress.textContent = this.#curExpression.join(" ");
-        curPos++;
-        this.#curExpression[curPos] = "0";
-        this.#curExpPos = curPos;
-        console.log(this.#curExpression);
+        // set next position to right oprend and set value to zero
+        this.#curExpPos++;
+        this.#curExpression[this.#curExpPos] = "0";
         // update current expression display
       }
       // if operator is 4th input process expression
@@ -129,12 +130,13 @@ class calculator {
     ]);
     // index 1 should always be the operator
     let expression = this.#curExpression;
+    expression[2] = this.#curNum;
     const [oprendL, operator, oprendR] = expression;
     const result = opMap.get(operator)(oprendL, oprendR);
     calcDisplay.textContent = result;
     calcDisplayExpress.textContent = expression.join(" ") + "=";
-    expression = [String(result)];
-    this.#curExpression = expression;
+    this.#curNum = [String(result)];
+    this.#curExpression = [0];
     // will need to look into this
     // The MS calc will continue using the result unless you enter a number
 
@@ -150,12 +152,14 @@ class calculator {
 
   _clear() {
     this.#curExpression = ["0"];
+    this.#curNum = "0";
     calcDisplay.textContent = this.#curExpression[0];
     calcDisplayExpress.textContent = "";
   }
   _clearEntry() {
-    this.#curExpression[this.#curExpPos] = "0";
-    calcDisplay.textContent = 0;
+    //this.#curExpression[this.#curExpPos] = "0";
+    this.#curNum = "0";
+    calcDisplay.textContent = this.#curNum;
   }
 
   _updateDisplayInput() {}
