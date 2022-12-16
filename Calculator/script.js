@@ -17,7 +17,6 @@ class calculator {
     ["clear", this._clear],
     ["clear entry", this._clearEntry],
     ["=", this._calcInput],
-    ["sqrt", this._calcSqrt],
   ]);
 
   constructor() {
@@ -87,6 +86,10 @@ class calculator {
       // if prev el is operator ignore
     } // end if
 
+    const specialOps = ["sqrt", "sqr", "inverse"];
+    if (specialOps.includes(inputVal)) {
+      this._performSpecialOp(inputVal);
+    }
     // we can just run the commmand at the end for now
     this._commandMap(inputVal);
   }
@@ -151,25 +154,40 @@ class calculator {
     // after getting results store in history
   }
 
-  _calcSqrt() {
-    let result = this.#curExpression[this.#curExpPos];
+  _performSpecialOp(inputVal) {
+    let result;
     if (this.#curExpPos === 0) {
-      this.#leftOprendStack.push("sqrt");
-      this.#leftOprendStack.forEach((action) => {
-        result = Math.sqrt(result);
-      });
+      result = this._computeSpecialOp(this.#leftOprendStack, inputVal);
     } // end if
 
     if (this.#curExpPos === 2) {
-      this.#rightOprendStack.push("sqrt");
+      result = this._computeSpecialOp(this.#rightOprendStack, inputVal);
     } // end if
-
     this._updateDisplayInput(result);
     this._updateDisplayExpress(this.#curExpression[this.#curExpPos]);
   }
 
+  _computeSpecialOp(stack, op) {
+    let result = this.#curExpression[this.#curExpPos];
+    stack.push(op);
+    stack.forEach((action) => {
+      if (action === "inverse") {
+        result = Math.pow(result, -1);
+      }
+      if (action === "sqrt") {
+        result = Math.sqrt(result);
+      }
+      if (action === "sqr") {
+        result = Math.pow(result, 2);
+      }
+    });
+    return result;
+  }
+
   _clear() {
     this.#curExpression = ["0"];
+    this.#leftOprendStack = [];
+    this.#rightOprendStack = [];
     this._updateDisplayInput(this.#curExpression[0]);
     this._updateDisplayExpress("");
   }
@@ -184,21 +202,24 @@ class calculator {
 
   _updateDisplayExpress(input) {
     let output;
-    const build = (oprend, stack) => {
-      stack.forEach((action) => {
-        oprend = `${action}(${oprend})`;
-      });
-
-      return oprend;
-    };
     if (this.#leftOprendStack.length !== 0) {
-      console.log(this.#leftOprendStack);
-      output = build(input, this.#leftOprendStack);
+      output = this._buildSpecialExpress(
+        this.#leftOprendStack,
+        this.#curExpression[0]
+      );
     }
 
     if (this.#rightOprendStack.length !== 0) {
     }
+
     calcDisplayExpress.textContent = output;
+  }
+  _buildSpecialExpress(stack, oprend) {
+    console.log(`stack: ${stack}`);
+    stack.forEach((action) => {
+      oprend = `${action !== "inverse" ? action : "1/"}(${oprend})`;
+    });
+    return oprend;
   }
 
   _addToHistry() {}
