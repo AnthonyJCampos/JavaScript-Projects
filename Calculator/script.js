@@ -7,7 +7,6 @@ const calcDisplayExpress = document.querySelector(".calc__prev__text");
 const calcPad = document.querySelector(".calc__pad");
 
 class calculator {
-  #curNum = "0";
   #curExpression = ["0"];
   #curExpPos = 0;
   #calcResult;
@@ -16,6 +15,7 @@ class calculator {
     ["clear", this._clear],
     ["clear entry", this._clearEntry],
     ["=", this._calcInput],
+    ["sqrt", this._calcSqrt],
   ]);
 
   constructor() {
@@ -49,39 +49,41 @@ class calculator {
     const operators = ["/", "*", "-", "+"];
     // check if button pressed is a number or decimal
     if (isFinite(inputVal) || inputVal === ".") {
-      this.#curNum = this._validateOprend(this.#curNum, inputVal);
-      console.log("inside number inputer", this.#curNum);
-      calcDisplay.textContent = this.#curNum;
+      // if calcResult is defined, reset
+      this.#calcResult = undefined;
+
+      const curVal = this.#curExpression[this.#curExpPos];
+      this.#curExpression[this.#curExpPos] = this._validateOprend(
+        curVal,
+        inputVal
+      );
+      this._updateDisplayInput(this.#curExpression[this.#curExpPos]);
       // set the value in the calcDisplay
     }
 
     if (operators.includes(inputVal)) {
-      // so if operator is 1st or 2nd input and is not already in expression
-
+      // if calcResult has not been reset insert into left oprend
+      if (this.#calcResult) {
+        this.#curExpression[0] = this.#calcResult;
+      } // end if
+      // if operator is 1st or 2nd input and is not already in expression
       if (
         !this._hasOperator(operators, inputVal) &&
         this.#curExpression.length <= 2
       ) {
-        // set the left oprend
-        this.#curExpression[this.#curExpPos] = this.#curNum;
-        // reset the current number value
-        this.#curNum = "0";
-        // insert the operator into the expression, ahead of first value
-        this.#curExpression[++this.#curExpPos] = inputVal;
-        // update display
-        calcDisplayExpress.textContent = this.#curExpression.join(" ");
-        // set next position to right oprend and set value to zero
-        this.#curExpPos++;
-        this.#curExpression[this.#curExpPos] = "0";
-        // update current expression display
-      }
+        this._processOprend(inputVal);
+      } // end if
       // if operator is 4th input process expression
       if (this.#curExpression.length === 3) {
         // we solve the expression using the command
+        this._commandMap("=");
         // save the result as the first value, and add the operator to the expression
-      }
+        this.#curExpression[0] = this.#calcResult;
+        this._processOprend(inputVal);
+      } // end if
+
       // if prev el is operator ignore
-    }
+    } // end if
 
     // we can just run the commmand at the end for now
     this._commandMap(inputVal);
@@ -95,6 +97,15 @@ class calculator {
     });
     return false;
   } // end _hasOperator
+
+  _processOprend(inputVal) {
+    this.#curExpression[++this.#curExpPos] = inputVal;
+    // update current expression display
+    this._updateDisplayExpress(this.#curExpression.join(" "));
+    this.#curExpPos++;
+    this.#curExpression[this.#curExpPos] = "0";
+    this.#curExpPos = this.#curExpPos;
+  }
 
   _validateOprend(val, inputVal) {
     if (val === "0" && inputVal !== ".") {
@@ -129,40 +140,39 @@ class calculator {
       ["/", bigDecimal.divide],
     ]);
     // index 1 should always be the operator
-    let expression = this.#curExpression;
-    expression[2] = this.#curNum;
-    const [oprendL, operator, oprendR] = expression;
-    const result = opMap.get(operator)(oprendL, oprendR);
-    calcDisplay.textContent = result;
-    calcDisplayExpress.textContent = expression.join(" ") + "=";
-    this.#curNum = [String(result)];
-    this.#curExpression = [0];
-    // will need to look into this
-    // The MS calc will continue using the result unless you enter a number
-
-    // possible solution don't store the first num right away
-    // until we get an operator
+    const [oprendL, operator, oprendR] = this.#curExpression;
+    this.#calcResult = opMap.get(operator)(oprendL, oprendR);
+    this._updateDisplayInput(this.#calcResult);
+    this._updateDisplayExpress(this.#curExpression.join(" ") + " =");
     this.#curExpPos = 0;
-    console.log(this.#curExpression);
+    this.#curExpression = ["0"];
+    // after getting results store in history
+  }
 
-    // will need to update for when the user just hits equal with
-    // no operator
-    //return opMap.get(operator)(oprendL, oprendR);
+  _calcSqrt() {
+    const result = Math.sqrt(this.#curExpression[this.#curExpPos]);
+    this._updateDisplayInput(result);
   }
 
   _clear() {
     this.#curExpression = ["0"];
-    this.#curNum = "0";
-    calcDisplay.textContent = this.#curExpression[0];
-    calcDisplayExpress.textContent = "";
+    this._updateDisplayInput(this.#curExpression[0]);
+    this._updateDisplayExpress("");
   }
   _clearEntry() {
-    //this.#curExpression[this.#curExpPos] = "0";
-    this.#curNum = "0";
-    calcDisplay.textContent = this.#curNum;
+    this.#curExpression[this.#curExpPos] = "0";
+    this._updateDisplayInput("0");
   }
 
-  _updateDisplayInput() {}
+  _updateDisplayInput(input) {
+    calcDisplay.textContent = bigDecimal.getPrettyValue(input);
+  }
+
+  _updateDisplayExpress(input) {
+    calcDisplayExpress.textContent = input;
+  }
+
+  _addToHistry() {}
 } // end of calculator
 
 const calc = new calculator();
