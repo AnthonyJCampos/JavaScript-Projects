@@ -50,7 +50,6 @@ class calculator {
     const operators = ["/", "*", "-", "+"];
     // check if button pressed is a number or decimal
     if (isFinite(inputVal) || inputVal === ".") {
-      console.log(this.#calcResult);
       // if calcResult is defined, reset
       if (this.#calcResult) {
         this.#calcResult = undefined;
@@ -64,7 +63,7 @@ class calculator {
         curVal,
         inputVal
       );
-      console.log(curVal);
+
       this._updateDisplayInput(this.#curExpression[this.#curExpPos]);
       // set the value in the calcDisplay
     }
@@ -98,10 +97,22 @@ class calculator {
 
     const specialOps = ["sqrt", "sqr", "inverse"];
     if (specialOps.includes(inputVal)) {
-      const result = this._performSpecialOp(inputVal);
-      this.#calcResult = result;
+      let output = "";
+      let result;
+      if (
+        inputVal !== "inverse" &&
+        this.#curExpression[this.#curExpPos] !== "0"
+      ) {
+        result = this._performSpecialOp(inputVal);
+        output = this._output();
+        this.#calcResult = result;
+      } else {
+        this._resetData();
+        output = "1/(0)";
+        result = "Cannot divide by zero";
+      }
       this._updateDisplayInput(result);
-      this._output();
+      this._updateDisplayExpress(output);
     }
 
     // maybe update display here
@@ -122,7 +133,8 @@ class calculator {
   _processOprend(inputVal) {
     this.#curExpression[++this.#curExpPos] = inputVal;
     // update current expression display
-    this._output();
+    const output = this._output();
+    this._updateDisplayExpress(output);
     this.#curExpPos++;
     this.#curExpression[this.#curExpPos] = "0";
     this.#curExpPos = this.#curExpPos;
@@ -154,30 +166,52 @@ class calculator {
   _storeOperator() {}
 
   _calcInput() {
+    const expression = this.#curExpression;
     const opMap = new Map([
       ["+", bigDecimal.add],
       ["-", bigDecimal.subtract],
       ["*", bigDecimal.multiply],
       ["/", bigDecimal.divide],
     ]);
+
+    let result;
     // index 1 should always be the operator
-
-    // handle special cases
-    const [oprendL, operator, oprendR] = this._determineExpression();
-    if (operator === "/" && oprendR === "0") {
-      // display error message
-      calcDisplay.textContent = "Cannot divide by zero";
-      this._updateDisplayExpress("");
-    } else if (this.#curExpression.length === 1) {
-      this.#calcResult = this.#curExpression[0];
-    } else {
-      // compute results
-      this.#calcResult = opMap.get(operator)(oprendL, oprendR);
-      // update result display field
-      this._updateDisplayInput(this.#calcResult);
-
-      this._output();
+    if (expression.length === 1) {
+      // if there is only a single oprend, then return itself
+      result = expression[0];
     }
+
+    if (expression.length === 2) {
+      // if there is only one oprend then make this oprend the 2nd one as well
+      expression.push(expression[0]);
+    }
+
+    let output = "";
+    let error = false;
+    if (expression.length === 3) {
+      const [oprendL, operator, oprendR] = this._determineExpression();
+
+      if (operator === "/" && oprendR === "0") {
+        // display error message
+        error = true;
+        result = "Cannot divide by zero";
+      }
+
+      if (!error) {
+        // compute results
+
+        result = opMap.get(operator)(oprendL, oprendR);
+      }
+    }
+
+    if (!error) {
+      output = this._output() + " =";
+      this.#calcResult = result;
+    }
+
+    // update result display field
+    this._updateDisplayInput(result);
+    this._updateDisplayExpress(output);
 
     // reset position, expression and stacks
     this.#curExpPos = 0;
@@ -235,8 +269,18 @@ class calculator {
     this.#curExpression = ["0"];
     this.#leftOprendStack = [];
     this.#rightOprendStack = [];
+    this.#calcResult = undefined;
     this._updateDisplayInput(this.#curExpression[0]);
     this._updateDisplayExpress("");
+  }
+
+  _resetData() {
+    // reset position, expression and stacks
+    this.#curExpPos = 0;
+    this.#curExpression = ["0"];
+    this.#leftOprendStack = [];
+    this.#rightOprendStack = [];
+    this.#calcResult = undefined;
   }
   _clearEntry() {
     this.#curExpression[this.#curExpPos] = "0";
@@ -244,7 +288,11 @@ class calculator {
   }
 
   _updateDisplayInput(input) {
-    calcDisplay.textContent = bigDecimal.getPrettyValue(input);
+    if (isFinite(input)) {
+      calcDisplay.textContent = bigDecimal.getPrettyValue(input);
+    } else {
+      calcDisplay.textContent = input;
+    }
   }
 
   _updateDisplayExpress(input) {
@@ -276,7 +324,8 @@ class calculator {
         output += this.#curExpression[2];
       } // end if
     } // end if
-    this._updateDisplayExpress(output);
+    //this._updateDisplayExpress(output);
+    return output;
   }
 
   _buildSpecialExpress(stack, oprend) {
