@@ -139,16 +139,16 @@ class calculator {
       let output = "";
       let result;
       if (
-        inputVal !== "inverse" &&
-        this.#curExpression[this.#curExpPos] !== "0"
+        inputVal === "inverse" &&
+        this.#curExpression[this.#curExpPos] === "0"
       ) {
-        result = this._performSpecialOp(inputVal);
-        output = this._output();
-        this.#calcResult = result;
-      } else {
         this._resetData();
         output = "1/(0)";
         result = "Cannot divide by zero";
+      } else {
+        result = this._performSpecialOp(inputVal);
+        output = this._output();
+        this.#calcResult = result;
       }
       this._updateDisplayInput(result);
       this._updateDisplayExpress(output);
@@ -217,7 +217,12 @@ class calculator {
     // index 1 should always be the operator
     if (expression.length === 1) {
       // if there is only a single oprend, then return itself
-      result = expression[0];
+
+      if (this._leftStackIsEmpty()) {
+        result = expression[0];
+      } else {
+        result = this._computeSpecialOp(this.#leftOprendStack);
+      }
     }
 
     if (expression.length === 2) {
