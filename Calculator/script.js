@@ -6,6 +6,27 @@ const calcDisplay = document.querySelector(".calc__text");
 const calcDisplayExpress = document.querySelector(".calc__prev__text");
 const calcPad = document.querySelector(".calc__pad");
 
+calcPad.addEventListener("mouseover", function (event) {
+  if (!event.target.closest(".btn")) {
+    return;
+  }
+  event.target.style.color = "white";
+  event.target.style.backgroundColor = "gray";
+  if (event.target.value !== "back") {
+    event.target.style.fontSize = "50px";
+  } else {
+    event.target.style.fontSize = "32px";
+  }
+});
+calcPad.addEventListener("mouseout", function (event) {
+  if (!event.target.closest(".btn")) {
+    return;
+  }
+  event.target.style.color = "gray";
+  event.target.style.backgroundColor = "white";
+  event.target.style.fontSize = "20px";
+});
+
 class calculator {
   #curExpression = ["0"];
   #curExpPos = 0;
@@ -32,7 +53,7 @@ class calculator {
   }
 
   _processBtnInput(event) {
-    if (event.target.classList === "calc__pad") {
+    if (!event.target.closest(".btn")) {
       return;
     } // end if
 
