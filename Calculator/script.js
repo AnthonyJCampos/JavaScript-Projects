@@ -10,10 +10,23 @@ calcPad.addEventListener("mouseover", function (event) {
   if (!event.target.closest(".btn")) {
     return;
   }
+
   event.target.style.color = "white";
   event.target.style.backgroundColor = "gray";
+
+  if (event.target.childNodes[1]) {
+    event.target.childNodes[1].style.color = "white";
+    event.target.childNodes[1].style.backgroundColor = "gray";
+  }
+
   if (event.target.value !== "back") {
-    event.target.style.fontSize = "50px";
+    if (event.target.classList.value !== "expo") {
+      event.target.style.fontSize = "50px";
+    } else {
+      event.target.parentNode.style.color = "white";
+      event.target.parentNode.style.backgroundColor = "gray";
+      event.target.parentNode.style.fontSize = "50px";
+    }
   } else {
     event.target.style.fontSize = "32px";
   }
@@ -21,6 +34,11 @@ calcPad.addEventListener("mouseover", function (event) {
 calcPad.addEventListener("mouseout", function (event) {
   if (!event.target.closest(".btn")) {
     return;
+  }
+
+  if (event.target.childNodes[1]) {
+    event.target.childNodes[1].style.color = "gray";
+    event.target.childNodes[1].style.backgroundColor = "white";
   }
   event.target.style.color = "gray";
   event.target.style.backgroundColor = "white";

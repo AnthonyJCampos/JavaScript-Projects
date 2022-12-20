@@ -1,6 +1,44 @@
+h1 {
+  font-size: 100%;
+  margin: 0;
+  padding: 10px;
+}
+
+h2 {
+  font-size: 100%;
+  margin: 0;
+  padding: 10px;
+}
+header {
+  grid-area: header;
+  background-color: white;
+}
+
+nav {
+  grid-area: nav;
+  background-color: white;
+}
+
+aside {
+  grid-area: aside;
+}
+
+.history {
+  background-color: white;
+  padding: 10px;
+}
+
+main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+}
+
 .calc__container {
+  grid-area: calc;
   height: 700px;
   width: 550px;
+  padding: 10px;
   display: grid;
   grid-template-columns: 75% 25%;
   grid-template-rows: 5% 5% auto;
@@ -10,42 +48,13 @@
     "main aside";
 
   align-content: stretch;
-}
-
-h1 {
-  font-size: 100%;
-}
-
-h2 {
-  font-size: 100%;
-}
-header {
-  grid-area: header;
-  background-color: antiquewhite;
-}
-
-nav {
-  grid-area: nav;
-  background-color: cadetblue;
-}
-
-aside {
-  grid-area: aside;
-  padding: 10px;
-  background-color: beige;
-}
-
-main {
-  grid-area: main;
-  background-color: burlywood;
-  display: flex;
-  flex-direction: column;
-}
-
-.calc__container {
   color: gray;
+  border-radius: 0.5rem;
   background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
+
 .background {
   display: flex;
   justify-content: center;
@@ -53,9 +62,9 @@ main {
 
 .calc__display {
   color: gray;
-  background-color: white;
+  background-color: #f5f2f2;
   display: flex;
-
+  border-radius: 0.5rem;
   flex-direction: column;
   height: 25%;
   justify-content: center;
@@ -94,4 +103,9 @@ main {
   border-radius: 5px;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
     rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.expo {
+  vertical-align: super;
+  font-size: 50%;
 }
