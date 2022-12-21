@@ -5,6 +5,21 @@
 const calcDisplay = document.querySelector(".calc__text");
 const calcDisplayExpress = document.querySelector(".calc__prev__text");
 const calcPad = document.querySelector(".calc__pad");
+const clearHistoryBtn = document.querySelector(".btn__history");
+
+clearHistoryBtn.addEventListener("mouseover", function (event) {
+  clearHistoryBtn.style.backgroundColor = "gray";
+  const [svgGray, svgWhite] = clearHistoryBtn.children;
+  svgGray.classList.add("hidden");
+  svgWhite.classList.remove("hidden");
+});
+
+clearHistoryBtn.addEventListener("mouseout", function (event) {
+  clearHistoryBtn.style.backgroundColor = "white";
+  const [svgGray, svgWhite] = clearHistoryBtn.children;
+  svgGray.classList.remove("hidden");
+  svgWhite.classList.add("hidden");
+});
 
 calcPad.addEventListener("mouseover", function (event) {
   if (!event.target.closest(".btn")) {

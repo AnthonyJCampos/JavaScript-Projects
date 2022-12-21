@@ -1,20 +1,32 @@
+/* global reset */
+* {
+  margin: 0;
+  padding: 0;
+}
+
 h1 {
   font-size: 100%;
-  margin: 0;
   padding: 10px;
 }
 
 h2 {
   font-size: 100%;
-  margin: 0;
   padding: 10px;
 }
+
+h3 {
+  font-size: 100%;
+  padding: 10px;
+}
+
 header {
+  height: 35px;
   grid-area: header;
   background-color: white;
 }
 
 nav {
+  height: 35px;
   grid-area: nav;
   background-color: white;
 }
@@ -48,7 +60,8 @@ main {
     "main aside";
 
   align-content: stretch;
-  color: gray;
+  font-family: sans-serif;
+  color: #808080;
   border-radius: 0.5rem;
   background-color: white;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
@@ -59,6 +72,92 @@ main {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.calc__history {
+  display: grid;
+  grid-template-rows: 35px auto 55px;
+  width: 137.5px;
+  height: auto;
+}
+
+.history__title {
+  height: 35px;
+}
+
+.history__list__container {
+  height: 100%;
+  width: 136px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.history__list__container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.history__list__container::-webkit-scrollbar-track {
+  -webkit-box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.3) 0px -3px 0px inset;
+  border-radius: 10px;
+}
+
+.history__list__container::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: darkgrey;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.5) 0px -3px 0px inset;
+}
+
+.history__item {
+  display: grid;
+  grid-template-rows: 20px 30px;
+  height: 50px;
+  padding: 10px;
+  color: #808080;
+  text-align: right;
+}
+
+.history__item--expression {
+  padding: 2px;
+}
+
+.history__item--result {
+  padding: 2px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.history__bottom {
+  padding-top: 5px;
+  text-align: right;
+}
+
+.btn__history {
+  padding-bottom: 5px;
+  height: 50px;
+  width: 50px;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.trash__svg {
+  width: 75%;
+  margin: auto;
+  display: block;
+}
+
+.svg__gray {
+  filter: drop-shadow(3px 3px 2px rgb(0 0 0 / 0.4));
+}
+.svg__white {
+  filter: drop-shadow(3px 3px 2px rgba(255, 254, 254, 0.4));
+}
+.hidden {
+  display: none;
 }
 
 .calc__display {
