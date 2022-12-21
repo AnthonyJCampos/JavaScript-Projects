@@ -94,7 +94,7 @@ main {
   max-height: 565px;
   width: 136px;
   overflow: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .history__list::-webkit-scrollbar {
