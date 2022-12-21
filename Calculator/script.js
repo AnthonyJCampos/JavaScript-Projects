@@ -266,6 +266,8 @@ class calculator {
     if (!error) {
       output = this._output() + " =";
       this.#calcResult = result;
+      // after getting results store in history
+      this._addToHistry();
     }
 
     // update result display field
@@ -277,7 +279,6 @@ class calculator {
     this.#curExpression = ["0"];
     this.#leftOprendStack = [];
     this.#rightOprendStack = [];
-    // after getting results store in history
   }
 
   _determineExpression() {
@@ -394,7 +395,16 @@ class calculator {
     return oprend;
   }
 
-  _addToHistry() {}
+  _addToHistry() {
+    const historyList = document.querySelector(".history__list");
+    const html = `<il class="history__item">
+    <div class="history__item--expression">${this.#curExpression.join(
+      " "
+    )} =</div>
+    <div class="history__item--result">${this.#calcResult}</div></il>`;
+
+    historyList.insertAdjacentHTML("afterbegin", html);
+  }
 
   _leftStackIsEmpty() {
     if (this.#leftOprendStack.length === 0) {
