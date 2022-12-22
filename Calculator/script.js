@@ -431,7 +431,7 @@ class calculator {
           event.target.style.fontSize = "50%";
         }
       } else {
-        event.target.style.fontSize = "50%";
+        event.target.style.fontSize = "32px";
       }
     });
     calcPad.addEventListener("mouseout", function (event) {
