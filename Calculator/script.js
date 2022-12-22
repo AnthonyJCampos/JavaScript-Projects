@@ -2,64 +2,6 @@
 
 /** Application  Architecture*/
 
-const calcDisplay = document.querySelector(".calc__text");
-const calcDisplayExpress = document.querySelector(".calc__prev__text");
-const calcPad = document.querySelector(".calc__pad");
-const clearHistoryBtn = document.querySelector(".btn__history");
-
-clearHistoryBtn.addEventListener("mouseover", function (event) {
-  clearHistoryBtn.style.backgroundColor = "gray";
-  const [svgGray, svgWhite] = clearHistoryBtn.children;
-  svgGray.classList.add("hidden");
-  svgWhite.classList.remove("hidden");
-});
-
-clearHistoryBtn.addEventListener("mouseout", function (event) {
-  clearHistoryBtn.style.backgroundColor = "white";
-  const [svgGray, svgWhite] = clearHistoryBtn.children;
-  svgGray.classList.remove("hidden");
-  svgWhite.classList.add("hidden");
-});
-
-calcPad.addEventListener("mouseover", function (event) {
-  if (!event.target.closest(".btn")) {
-    return;
-  }
-
-  event.target.style.color = "white";
-  event.target.style.backgroundColor = "gray";
-
-  if (event.target.childNodes[1]) {
-    event.target.childNodes[1].style.color = "white";
-    event.target.childNodes[1].style.backgroundColor = "gray";
-  }
-
-  if (event.target.value !== "back") {
-    if (event.target.classList.value !== "expo") {
-      event.target.style.fontSize = "50px";
-    } else {
-      event.target.parentNode.style.color = "white";
-      event.target.parentNode.style.backgroundColor = "gray";
-      event.target.parentNode.style.fontSize = "50px";
-    }
-  } else {
-    event.target.style.fontSize = "32px";
-  }
-});
-calcPad.addEventListener("mouseout", function (event) {
-  if (!event.target.closest(".btn")) {
-    return;
-  }
-
-  if (event.target.childNodes[1]) {
-    event.target.childNodes[1].style.color = "gray";
-    event.target.childNodes[1].style.backgroundColor = "white";
-  }
-  event.target.style.color = "gray";
-  event.target.style.backgroundColor = "white";
-  event.target.style.fontSize = "20px";
-});
-
 class calculator {
   #curExpression = ["0"];
   #curExpPos = 0;
@@ -78,10 +20,11 @@ class calculator {
 
   _getInput() {
     // process input from calc pad
-    calcPad.addEventListener("click", this._processBtnInput.bind(this));
 
     // process input from user's keyboard
     addEventListener("keydown", this._iskeyValid.bind(this));
+
+    this._initElements();
   }
 
   _processBtnInput(event) {
@@ -374,6 +317,7 @@ class calculator {
   }
 
   _updateDisplayInput(input) {
+    const calcDisplay = document.querySelector(".calc__text");
     if (isFinite(input)) {
       calcDisplay.textContent = bigDecimal.getPrettyValue(input);
     } else {
@@ -382,6 +326,7 @@ class calculator {
   }
 
   _updateDisplayExpress(input) {
+    const calcDisplayExpress = document.querySelector(".calc__prev__text");
     calcDisplayExpress.textContent = input;
   }
 
@@ -444,6 +389,84 @@ class calculator {
       return true;
     }
     return false;
+  }
+
+  _clearHistory() {
+    const historyList = document.querySelector(".history__list");
+    while (historyList.firstChild) {
+      historyList.removeChild(historyList.firstChild);
+    }
+  }
+
+  _initElements() {
+    this._initHistory();
+    this._initCalcPad();
+  }
+
+  _initCalcPad() {
+    // get the current button set for the calculator
+    const calcPad = document.querySelector(".calc__pad");
+    // set the click event for these buttons
+    calcPad.addEventListener("click", this._processBtnInput.bind(this));
+
+    // set the visual effects for the calculator buttons
+    calcPad.addEventListener("mouseover", function (event) {
+      if (!event.target.closest(".btn")) {
+        return;
+      }
+
+      event.target.style.color = "white";
+      event.target.style.backgroundColor = "gray";
+
+      if (event.target.childNodes[1]) {
+        event.target.childNodes[1].style.color = "white";
+        event.target.childNodes[1].style.backgroundColor = "gray";
+      }
+
+      if (event.target.value !== "back") {
+        if (event.target.classList.value !== "expo") {
+          event.target.style.fontSize = "50px";
+        } else {
+          event.target.parentNode.style.color = "white";
+          event.target.parentNode.style.backgroundColor = "gray";
+          event.target.parentNode.style.fontSize = "50px";
+        }
+      } else {
+        event.target.style.fontSize = "32px";
+      }
+    });
+    calcPad.addEventListener("mouseout", function (event) {
+      if (!event.target.closest(".btn")) {
+        return;
+      }
+
+      if (event.target.childNodes[1]) {
+        event.target.childNodes[1].style.color = "gray";
+        event.target.childNodes[1].style.backgroundColor = "white";
+      }
+      event.target.style.color = "gray";
+      event.target.style.backgroundColor = "white";
+      event.target.style.fontSize = "20px";
+    });
+  }
+
+  _initHistory() {
+    const clearHistoryBtn = document.querySelector(".btn__history");
+    clearHistoryBtn.addEventListener("click", this._clearHistory.bind(this));
+
+    clearHistoryBtn.addEventListener("mouseover", function (event) {
+      clearHistoryBtn.style.backgroundColor = "gray";
+      const [svgGray, svgWhite] = clearHistoryBtn.children;
+      svgGray.classList.add("hidden");
+      svgWhite.classList.remove("hidden");
+    });
+
+    clearHistoryBtn.addEventListener("mouseout", function (event) {
+      clearHistoryBtn.style.backgroundColor = "white";
+      const [svgGray, svgWhite] = clearHistoryBtn.children;
+      svgGray.classList.remove("hidden");
+      svgWhite.classList.add("hidden");
+    });
   }
 } // end of calculator
 
