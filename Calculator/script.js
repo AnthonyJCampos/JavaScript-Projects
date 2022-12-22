@@ -1,7 +1,5 @@
 "use strict";
 
-/** Application  Architecture*/
-
 class calculator {
   #curExpression = ["0"];
   #curExpPos = 0;
