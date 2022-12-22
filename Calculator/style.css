@@ -23,12 +23,16 @@ header {
   height: 35px;
   grid-area: header;
   background-color: white;
+  border-radius: 0.5rem;
 }
 
 nav {
   height: 35px;
   grid-area: nav;
   background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
 aside {
@@ -41,6 +45,7 @@ aside {
 }
 
 main {
+  margin-top: 3px;
   grid-area: main;
   display: flex;
   flex-direction: column;
@@ -69,6 +74,7 @@ main {
 }
 
 .background {
+  margin-top: 50px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -171,6 +177,8 @@ main {
   flex-direction: column;
   height: 25%;
   justify-content: center;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
 }
 
 .calc__prev__text {
@@ -187,6 +195,7 @@ main {
   font-size: 50px;
 }
 .calc__pad {
+  margin-top: 4px;
   height: 75%;
   background-color: white;
   display: grid;
