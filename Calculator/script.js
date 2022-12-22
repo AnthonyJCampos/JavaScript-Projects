@@ -66,7 +66,6 @@ class calculator {
   #calcResult;
   #leftOprendStack = [];
   #rightOprendStack = [];
-  #calcHistory = [];
   #cmdMap = new Map([
     ["clear", this._clear],
     ["clear entry", this._clearEntry],
@@ -102,14 +101,26 @@ class calculator {
 
   _inputDelegatory(inputVal) {
     const operators = ["/", "*", "-", "+"];
+
     // check if button pressed is a number or decimal
     if (isFinite(inputVal) || inputVal === ".") {
+      /** TEST CODE */
+      if (this.#calcResult && this.#curExpression.length === 3) {
+        this._resetData();
+      }
+
       // if calcResult is defined, reset
       if (this.#calcResult) {
         this.#calcResult = undefined;
         if (this.#curExpression.length < 2) {
           this.#curExpression[0] = "0";
         }
+      }
+
+      // check if currently at operator
+      if (this.#curExpPos === 1) {
+        this.#curExpPos++;
+        this.#curExpression[this.#curExpPos] = "0";
       }
 
       const curVal = this.#curExpression[this.#curExpPos];
@@ -123,25 +134,28 @@ class calculator {
     }
 
     if (operators.includes(inputVal)) {
-      // if calcResult has not been reset insert into left oprend
-
-      if (this.#calcResult) {
-        this.#curExpression[0] = this.#calcResult;
-      } // end if
+      // so if expression is full & there is a result
+      // take result and store it in position 1 and add operator
+      if (this.#curExpression.length === 3 && this.#calcResult) {
+        this.#curExpPos = 0;
+        this.#curExpression = [this.#calcResult];
+        this._processOprend(inputVal);
+      }
 
       // if operator is 4th input process expression
-      if (this.#curExpression.length === 3) {
+      if (this.#curExpression.length === 3 && !this.#calcResult) {
         // we solve the expression using the command
         this._commandMap("=");
         // save the result as the first value, and add the operator to the expression
-        this.#curExpression[0] = this.#calcResult;
+        this.#curExpression = [this.#calcResult];
+        this.#curExpPos = 0;
         this._processOprend(inputVal);
       } // end if
 
       // if operator is 1st or 2nd input and is not already in expression
       if (
         !this._hasOperator(operators, inputVal) &&
-        this.#curExpression.length <= 2
+        this.#curExpression.length < 2
       ) {
         this._processOprend(inputVal);
       } // end if
@@ -151,6 +165,17 @@ class calculator {
 
     const specialOps = ["sqrt", "sqr", "inverse"];
     if (specialOps.includes(inputVal)) {
+      // if currently positioned on a operator,
+      // take first left oprend and use it
+      if (this.#curExpPos === 1) {
+        if (!this._leftStackIsEmpty()) {
+          this.#curExpression.push(this.#calcResult);
+        } else {
+          this.#curExpression.push(this.#curExpression[0]);
+        }
+        this.#curExpPos++;
+      }
+
       let output = "";
       let result;
       if (
@@ -168,8 +193,6 @@ class calculator {
       this._updateDisplayInput(result);
       this._updateDisplayExpress(output);
     }
-
-    // maybe update display here
 
     // we can just run the commmand at the end for now
     this._commandMap(inputVal);
@@ -189,9 +212,6 @@ class calculator {
     // update current expression display
     const output = this._output();
     this._updateDisplayExpress(output);
-    this.#curExpPos++;
-    this.#curExpression[this.#curExpPos] = "0";
-    this.#curExpPos = this.#curExpPos;
   }
 
   _validateOprend(val, inputVal) {
@@ -229,6 +249,8 @@ class calculator {
     ]);
 
     let result;
+    // its a special event when the user tries to compute already solved special operator
+    let specialEvent = false;
     // index 1 should always be the operator
     if (expression.length === 1) {
       // if there is only a single oprend, then return itself
@@ -236,7 +258,9 @@ class calculator {
       if (this._leftStackIsEmpty()) {
         result = expression[0];
       } else {
-        result = this._computeSpecialOp(this.#leftOprendStack);
+        result = this._computeSpecialOp(this.#leftOprendStack, 0);
+        // we set it to true, as this special case has occured
+        specialEvent = true;
       }
     }
 
@@ -258,7 +282,6 @@ class calculator {
 
       if (!error) {
         // compute results
-
         result = opMap.get(operator)(oprendL, oprendR);
       }
     }
@@ -274,21 +297,23 @@ class calculator {
     this._updateDisplayInput(result);
     this._updateDisplayExpress(output);
 
-    // reset position, expression and stacks
-    this.#curExpPos = 0;
-    this.#curExpression = ["0"];
-    this.#leftOprendStack = [];
-    this.#rightOprendStack = [];
+    // take care of special event
+    if (specialEvent) {
+      // set left oprend to result
+      expression[0] = result;
+      // and clear any special operations
+      this.#leftOprendStack = [];
+    } // end if
   }
 
   _determineExpression() {
     let [oprendL, operator, oprendR] = this.#curExpression;
     if (!this._leftStackIsEmpty()) {
-      oprendL = this._computeSpecialOp(this.#leftOprendStack);
+      oprendL = this._computeSpecialOp(this.#leftOprendStack, 0);
     }
 
     if (!this._rightStackIsEmpty()) {
-      oprendR = this._computeSpecialOp(this.#rightOprendStack);
+      oprendR = this._computeSpecialOp(this.#rightOprendStack, 2);
     }
 
     return [oprendL, operator, oprendR];
@@ -298,19 +323,19 @@ class calculator {
     let result;
     if (this.#curExpPos === 0) {
       this.#leftOprendStack.push(inputVal);
-      result = this._computeSpecialOp(this.#leftOprendStack);
+      result = this._computeSpecialOp(this.#leftOprendStack, 0);
     } // end if
 
     if (this.#curExpPos === 2) {
       this.#rightOprendStack.push(inputVal);
-      result = this._computeSpecialOp(this.#rightOprendStack);
+      result = this._computeSpecialOp(this.#rightOprendStack, 2);
     } // end if
 
     return result;
   }
 
-  _computeSpecialOp(stack) {
-    let result = this.#curExpression[this.#curExpPos];
+  _computeSpecialOp(stack, pos) {
+    let result = this.#curExpression[pos];
     stack.forEach((action) => {
       if (action === "inverse") {
         result = Math.pow(result, -1);
@@ -326,10 +351,7 @@ class calculator {
   }
 
   _clear() {
-    this.#curExpression = ["0"];
-    this.#leftOprendStack = [];
-    this.#rightOprendStack = [];
-    this.#calcResult = undefined;
+    this._resetData();
     this._updateDisplayInput(this.#curExpression[0]);
     this._updateDisplayExpress("");
   }
@@ -343,7 +365,11 @@ class calculator {
     this.#calcResult = undefined;
   }
   _clearEntry() {
-    this.#curExpression[this.#curExpPos] = "0";
+    // don't clear operators
+    if (this.#curExpPos !== 1) {
+      this.#curExpression[this.#curExpPos] = "0";
+    }
+
     this._updateDisplayInput("0");
   }
 
@@ -377,14 +403,14 @@ class calculator {
     if (this.#curExpression.length === 3) {
       if (!this._rightStackIsEmpty()) {
         output += this._buildSpecialExpress(
-          this.#leftOprendStack,
-          this.#curExpression[0]
+          this.#rightOprendStack,
+          this.#curExpression[2]
         );
       } else {
         output += this.#curExpression[2];
       } // end if
     } // end if
-    //this._updateDisplayExpress(output);
+
     return output;
   }
 
