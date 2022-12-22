@@ -428,9 +428,10 @@ class calculator {
           event.target.parentNode.style.color = "white";
           event.target.parentNode.style.backgroundColor = "gray";
           event.target.parentNode.style.fontSize = "50px";
+          event.target.style.fontSize = "50%";
         }
       } else {
-        event.target.style.fontSize = "32px";
+        event.target.style.fontSize = "50%";
       }
     });
     calcPad.addEventListener("mouseout", function (event) {
@@ -438,13 +439,17 @@ class calculator {
         return;
       }
 
+      if (event.target.classList.value !== "expo") {
+        event.target.style.color = "gray";
+        event.target.style.backgroundColor = "white";
+        event.target.style.fontSize = "20px";
+      }
+
       if (event.target.childNodes[1]) {
         event.target.childNodes[1].style.color = "gray";
         event.target.childNodes[1].style.backgroundColor = "white";
+        event.target.childNodes[1].style.fontSize = "50%";
       }
-      event.target.style.color = "gray";
-      event.target.style.backgroundColor = "white";
-      event.target.style.fontSize = "20px";
     });
   }
 
