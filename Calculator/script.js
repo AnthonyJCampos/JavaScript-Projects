@@ -4,12 +4,15 @@ class calculator {
   #curExpression = ["0"];
   #curExpPos = 0;
   #calcResult;
+  #solvedFlag = false;
   #leftOprendStack = [];
   #rightOprendStack = [];
   #cmdMap = new Map([
     ["clear", this._clear],
     ["clear entry", this._clearEntry],
     ["=", this._calcInput],
+    ["back", this._back],
+    ["+/-", this._negate],
   ]);
 
   constructor() {
@@ -232,6 +235,9 @@ class calculator {
       this.#calcResult = result;
       // after getting results store in history
       this._addToHistry();
+      this._updateSolvedState(true);
+    } else {
+      this._updateSolvedState(false);
     }
 
     // update result display field
@@ -291,6 +297,57 @@ class calculator {
     return result;
   }
 
+  _negate() {
+    // if current position is 1, do nothing
+    if (this.#curExpPos === 1) {
+      return;
+    }
+
+    this.#curExpression[this.#curExpPos] = bigDecimal.negate(
+      this.#curExpression[this.#curExpPos]
+    );
+
+    this._updateDisplayInput(this.#curExpression[this.#curExpPos]);
+  }
+
+  _back() {
+    // if current position is 1 do nothing
+    if (this.#curExpPos === 1) {
+      return;
+    }
+
+    // if full expression solved
+    // e.i the display contains a '=' sign
+    // clear special stacks, and display
+    if (this._getSolvedState()) {
+      this._updateSolvedState(false);
+      this.#leftOprendStack = [];
+      this.#rightOprendStack = [];
+      this._updateDisplayExpress("");
+      return;
+    }
+
+    // this is for special operations
+    if (this.#calcResult) {
+      return;
+    }
+
+    // get current position value and remove a single char
+    let curVal = this.#curExpression[this.#curExpPos];
+    // if there is only a single char, turn it to 0
+    if (curVal.length === 1) {
+      curVal = "0";
+    } else {
+      // else remove last char
+      curVal = curVal.slice(0, -1);
+    }
+
+    // update the current expression
+    this.#curExpression[this.#curExpPos] = curVal;
+    //updated display Input
+    this._updateDisplayInput(curVal);
+  }
+
   _clear() {
     this._resetData();
     this._updateDisplayInput(this.#curExpression[0]);
@@ -304,8 +361,14 @@ class calculator {
     this.#leftOprendStack = [];
     this.#rightOprendStack = [];
     this.#calcResult = undefined;
+    this._updateSolvedState(false);
   }
   _clearEntry() {
+    // if the current state is solved, clear all
+    if (this._getSolvedState()) {
+      this._clear();
+      return;
+    }
     // don't clear operators
     if (this.#curExpPos !== 1) {
       this.#curExpression[this.#curExpPos] = "0";
@@ -364,12 +427,23 @@ class calculator {
     return oprend;
   }
 
+  _updateSolvedState(bool) {
+    this.#solvedFlag = bool;
+  }
+
+  _getSolvedState() {
+    return this.#solvedFlag;
+  }
+
   _addToHistry() {
     const historyList = document.querySelector(".history__list");
+
+    // need to build expression in event of special operations
+    // can use the ouput method for this
+    const expression = this._output() + " =";
+
     const html = `<il class="history__item">
-    <div class="history__item--expression">${this.#curExpression.join(
-      " "
-    )} =</div>
+    <div class="history__item--expression">${expression} =</div>
     <div class="history__item--result">${this.#calcResult}</div></il>`;
 
     historyList.insertAdjacentHTML("afterbegin", html);
