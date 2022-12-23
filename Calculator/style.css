@@ -93,7 +93,7 @@ aside {
   display: flex;
   border-radius: 0.5rem;
   flex-direction: column;
-  height: 30%;
+  height: 25%;
   justify-content: center;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
     rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
@@ -114,8 +114,7 @@ aside {
 }
 .calc__pad {
   margin-top: 4px;
-  height: 70%;
-
+  height: 75%;
   background-color: white;
   display: grid;
   grid-gap: 3px;
@@ -136,12 +135,12 @@ aside {
 
 .history__list__container {
   height: 575px;
-  width: 136px;
+  width: 100%;
 }
 
 .history__list {
   max-height: 565px;
-  width: 136px;
+  width: 100%;
   overflow: hidden;
   overflow-y: auto;
 }
@@ -214,7 +213,7 @@ aside {
 
 .btn {
   height: 75px;
-  width: 100px;
+  width: auto;
   font-size: 20px;
   font-weight: bold;
   color: inherit;
