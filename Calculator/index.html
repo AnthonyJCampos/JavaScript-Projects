@@ -14,75 +14,79 @@
   </head>
   <body>
     <div class="background">
-      <div class="calc__container">
+      <div class="container">
         <header><h1>Calculator</h1></header>
-        <nav class="nav">
-          <div class="nav__drop"></div>
-          <h2>Standard</h2>
-        </nav>
-        <aside class="calc__history">
-          <div class="history__title"><h3>History</h3></div>
-          <div class="history__list__container">
-            <ul class="history__list">
-              <!--
-              <il class="history__item"
-                ><div class="history__item--expression">5 + 5 =</div>
-                <div class="history__item--result">10</div></il
-              >
-              -->
-            </ul>
-          </div>
-          <div class="history__bottom">
-            <button class="btn__history">
-              <img
-                src="imgs/trash-can-50-gray.svg"
-                alt="A trash Can icon, click to clear history"
-                class="trash__svg svg__gray"
-              />
-              <img
-                src="imgs/trash-can-50-white.svg"
-                alt="A trash Can icon, click to clear history"
-                class="trash__svg svg__white hidden"
-              />
-            </button>
-          </div>
-        </aside>
-        <main>
-          <div class="calc__display">
-            <div class="calc__prev__text"></div>
-            <div class="calc__text">0</div>
-          </div>
-          <div class="calc__pad">
-            <button class="btn" value="%">&percnt;</button>
-            <button class="btn" value="clear entry">CE</button>
-            <button class="btn" value="clear">C</button>
-            <button class="btn" value="back">Back</button>
-            <button class="btn" value="inverse">
-              x<span class="expo">-1</span>
-            </button>
-            <button class="btn" value="sqr">
-              x<span class="expo">2</span>
-            </button>
-            <button class="btn" value="sqrt">&Sqrt;</button>
-            <button class="btn" value="/">&divide;</button>
-            <button class="btn" value="7">7</button>
-            <button class="btn" value="8">8</button>
-            <button class="btn" value="9">9</button>
-            <button class="btn" value="*">&times;</button>
-            <button class="btn" value="4">4</button>
-            <button class="btn" value="5">5</button>
-            <button class="btn" value="6">6</button>
-            <button class="btn" value="-">&minus;</button>
-            <button class="btn" value="1">1</button>
-            <button class="btn" value="2">2</button>
-            <button class="btn" value="3">3</button>
-            <button class="btn" value="+">&plus;</button>
-            <button class="btn" value="+/-">&plusmn;</button>
-            <button class="btn" value="0">0</button>
-            <button class="btn" value=".">.</button>
-            <button class="btn" value="=">&equals;</button>
-          </div>
-        </main>
+
+        <div class="type__container">
+          <nav class="nav">
+            <div class="nav__drop"></div>
+            <h2>Standard</h2>
+          </nav>
+          <aside class="calc__history">
+            <div class="history__title"><h3>History</h3></div>
+            <div class="history__list__container">
+              <ul class="history__list">
+                <!--
+                <il class="history__item"
+                  ><div class="history__item--expression">5 + 5 =</div>
+                  <div class="history__item--result">10</div></il
+                >
+                -->
+              </ul>
+            </div>
+            <div class="history__bottom">
+              <button class="btn__history">
+                <img
+                  src="imgs/trash-can-50-gray.svg"
+                  alt="A trash Can icon, click to clear history"
+                  class="trash__svg svg__gray"
+                />
+                <img
+                  src="imgs/trash-can-50-white.svg"
+                  alt="A trash Can icon, click to clear history"
+                  class="trash__svg svg__white hidden"
+                />
+              </button>
+            </div>
+          </aside>
+
+          <main class="calc__container">
+            <div class="calc__display">
+              <div class="calc__prev__text"></div>
+              <div class="calc__text">0</div>
+            </div>
+            <div class="calc__pad">
+              <button class="btn" value="%">&percnt;</button>
+              <button class="btn" value="clear entry">CE</button>
+              <button class="btn" value="clear">C</button>
+              <button class="btn" value="back">Back</button>
+              <button class="btn" value="inverse">
+                x<span class="expo">-1</span>
+              </button>
+              <button class="btn" value="sqr">
+                x<span class="expo">2</span>
+              </button>
+              <button class="btn" value="sqrt">&Sqrt;</button>
+              <button class="btn" value="/">&divide;</button>
+              <button class="btn" value="7">7</button>
+              <button class="btn" value="8">8</button>
+              <button class="btn" value="9">9</button>
+              <button class="btn" value="*">&times;</button>
+              <button class="btn" value="4">4</button>
+              <button class="btn" value="5">5</button>
+              <button class="btn" value="6">6</button>
+              <button class="btn" value="-">&minus;</button>
+              <button class="btn" value="1">1</button>
+              <button class="btn" value="2">2</button>
+              <button class="btn" value="3">3</button>
+              <button class="btn" value="+">&plus;</button>
+              <button class="btn" value="+/-">&plusmn;</button>
+              <button class="btn" value="0">0</button>
+              <button class="btn" value=".">.</button>
+              <button class="btn" value="=">&equals;</button>
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   </body>

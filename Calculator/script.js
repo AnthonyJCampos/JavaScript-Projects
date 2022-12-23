@@ -440,7 +440,7 @@ class calculator {
 
     // need to build expression in event of special operations
     // can use the ouput method for this
-    const expression = this._output() + " =";
+    const expression = this._output();
 
     const html = `<il class="history__item">
     <div class="history__item--expression">${expression} =</div>
