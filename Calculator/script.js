@@ -379,6 +379,8 @@ class calculator {
 
   _updateDisplayInput(input) {
     const calcDisplay = document.querySelector(".calc__text");
+
+    console.log(calcDisplay.clientWidth);
     if (isFinite(input)) {
       calcDisplay.textContent = bigDecimal.getPrettyValue(input);
     } else {
