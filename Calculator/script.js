@@ -13,6 +13,7 @@ class calculator {
     ["=", this._calcInput],
     ["back", this._back],
     ["+/-", this._negate],
+    ["%", this._percent],
   ]);
 
   constructor() {
@@ -48,8 +49,7 @@ class calculator {
 
     // check if button pressed is a number or decimal
     if (isFinite(inputVal) || inputVal === ".") {
-      /** TEST CODE */
-      if (this.#calcResult && this.#curExpression.length === 3) {
+      if (this.#calcResult && this.#getPositionInExpression() === 2) {
         this._resetData();
       }
 
@@ -62,44 +62,39 @@ class calculator {
       }
 
       // check if currently at operator
-      if (this.#curExpPos === 1) {
-        this.#curExpPos++;
-        this.#curExpression[this.#curExpPos] = "0";
+      if (this.#getPositionInExpression() === 1) {
+        this.#incremenetPosition();
+        this.#setCurrentPosValue("0");
+        //this.#curExpression[this.#curExpPos] = "0";
       }
 
-      const curVal = this.#curExpression[this.#curExpPos];
-      this.#curExpression[this.#curExpPos] = this._validateOprend(
-        curVal,
-        inputVal
+      // const curVal = this.#curExpression[this.#curExpPos];
+      this.#setCurrentPosValue(
+        this._validateOprend(this.#getCurrentPosValue(), inputVal)
       );
 
-      this._updateDisplayInput(this.#curExpression[this.#curExpPos]);
+      this._updateDisplayInput(this.#getCurrentPosValue());
       // set the value in the calcDisplay
     }
 
     if (operators.includes(inputVal)) {
+      /** Refactored Code */
       // so if expression is full & there is a result
-      // take result and store it in position 1 and add operator
-      if (this.#curExpression.length === 3 && this.#calcResult) {
-        this.#curExpPos = 0;
-        this.#curExpression = [this.#calcResult];
+      // or if operator is 4th input process expression
+      if (this.#getPositionInExpression() === 2) {
+        // if operator is 4th input process expression
+        !this.#calcResult && this._commandMap("=");
+        // save the result as the first value, and add the operator to the expression
+        this.#resetExpression();
+        this.#setCurrentPosition(0);
+        this.#setCurrentPosValue(this.#calcResult);
         this._processOprend(inputVal);
       }
-
-      // if operator is 4th input process expression
-      if (this.#curExpression.length === 3 && !this.#calcResult) {
-        // we solve the expression using the command
-        this._commandMap("=");
-        // save the result as the first value, and add the operator to the expression
-        this.#curExpression = [this.#calcResult];
-        this.#curExpPos = 0;
-        this._processOprend(inputVal);
-      } // end if
-
       // if operator is 1st or 2nd input and is not already in expression
       if (
         !this._hasOperator(operators, inputVal) &&
-        this.#curExpression.length < 2
+        // this.#curExpression.length < 2
+        this.#getPositionInExpression() === 0
       ) {
         this._processOprend(inputVal);
       } // end if
@@ -120,7 +115,7 @@ class calculator {
         this.#curExpPos++;
       }
 
-      let output = "";
+      let output = " ";
       let result;
       if (
         inputVal === "inverse" &&
@@ -179,7 +174,12 @@ class calculator {
     if (!cmd) {
       return;
     }
-    cmd();
+    const [displayInput, displayExpression] = cmd();
+    console.log(displayInput, displayExpression);
+    displayInput && this._updateDisplayInput(displayInput);
+    displayExpression && this._updateDisplayExpress(displayExpression);
+
+    // update displays with results
   }
   _storeOperator() {}
 
@@ -210,10 +210,10 @@ class calculator {
 
     if (expression.length === 2) {
       // if there is only one oprend then make this oprend the 2nd one as well
-      expression.push(expression[0]);
+      //expression.push(expression[0]);
+      this.#copyLeftOprendToRight();
     }
 
-    let output = "";
     let error = false;
     if (expression.length === 3) {
       const [oprendL, operator, oprendR] = this._determineExpression();
@@ -230,6 +230,7 @@ class calculator {
       }
     }
 
+    let output = " ";
     if (!error) {
       output = this._output() + " =";
       this.#calcResult = result;
@@ -238,11 +239,12 @@ class calculator {
       this._updateSolvedState(true);
     } else {
       this._updateSolvedState(false);
+      this._resetData();
     }
 
     // update result display field
-    this._updateDisplayInput(result);
-    this._updateDisplayExpress(output);
+    //this._updateDisplayInput(result);
+    //this._updateDisplayExpress(output);
 
     // take care of special event
     if (specialEvent) {
@@ -251,6 +253,9 @@ class calculator {
       // and clear any special operations
       this.#leftOprendStack = [];
     } // end if
+
+    // update result display field
+    return [result, output];
   }
 
   _determineExpression() {
@@ -297,23 +302,52 @@ class calculator {
     return result;
   }
 
+  _percent() {
+    // if position 0 set to zero
+    const pos = this.#getPositionInExpression();
+    if (pos === 0) {
+      this.#setCurrentPosValue("0");
+      return ["0", this.#getCurrentPosValue()];
+    }
+
+    // if POS 1, copy left oprend to right oprend
+    if (pos === 1) {
+      this.#incremenetPosition();
+      this.#copyLeftOprendToRight();
+    }
+    // account for special operations
+    const [leftOp, , rightOp] = this._determineExpression();
+
+    // (POS1 * POS2 / 100), Then set POS2 to result
+    const result = bigDecimal.divide(
+      bigDecimal.multiply(leftOp, rightOp),
+      "100",
+      2
+    );
+    this.#setCurrentPosValue(result);
+    // if right position has special operators, clear
+    this.#rightOprendStack = [];
+    return [result, this._output()];
+  }
+
   _negate() {
     // if current position is 1, do nothing
     if (this.#curExpPos === 1) {
-      return;
+      return [];
     }
 
     this.#curExpression[this.#curExpPos] = bigDecimal.negate(
       this.#curExpression[this.#curExpPos]
     );
 
-    this._updateDisplayInput(this.#curExpression[this.#curExpPos]);
+    //this._updateDisplayInput(this.#curExpression[this.#curExpPos]);
+    return [this.#getCurrentPosValue()];
   }
 
   _back() {
     // if current position is 1 do nothing
     if (this.#curExpPos === 1) {
-      return;
+      return [];
     }
 
     // if full expression solved
@@ -323,13 +357,13 @@ class calculator {
       this._updateSolvedState(false);
       this.#leftOprendStack = [];
       this.#rightOprendStack = [];
-      this._updateDisplayExpress("");
-      return;
+      //this._updateDisplayExpress("");
+      return [, " "];
     }
 
     // this is for special operations
     if (this.#calcResult) {
-      return;
+      return [];
     }
 
     // get current position value and remove a single char
@@ -345,13 +379,16 @@ class calculator {
     // update the current expression
     this.#curExpression[this.#curExpPos] = curVal;
     //updated display Input
-    this._updateDisplayInput(curVal);
+    //this._updateDisplayInput(curVal);
+    return [this.#getCurrentPosValue()];
   }
 
   _clear() {
     this._resetData();
-    this._updateDisplayInput(this.#curExpression[0]);
-    this._updateDisplayExpress("");
+    //this._updateDisplayInput(this.#curExpression[0]);
+    //this._updateDisplayExpress("");
+    // return input and expression
+    return [this.#getCurrentPosValue(), " "];
   }
 
   _resetData() {
@@ -366,35 +403,20 @@ class calculator {
   _clearEntry() {
     // if the current state is solved, clear all
     if (this._getSolvedState()) {
-      this._clear();
-      return;
+      //this._clear();
+      return this._clear();
     }
     // don't clear operators
     if (this.#curExpPos !== 1) {
       this.#curExpression[this.#curExpPos] = "0";
     }
 
-    this._updateDisplayInput("0");
-  }
-
-  _updateDisplayInput(input) {
-    const calcDisplay = document.querySelector(".calc__text");
-
-    console.log(calcDisplay.clientWidth);
-    if (isFinite(input)) {
-      calcDisplay.textContent = bigDecimal.getPrettyValue(input);
-    } else {
-      calcDisplay.textContent = input;
-    }
-  }
-
-  _updateDisplayExpress(input) {
-    const calcDisplayExpress = document.querySelector(".calc__prev__text");
-    calcDisplayExpress.textContent = input;
+    //this._updateDisplayInput("0");
+    return [this.#getCurrentPosValue()];
   }
 
   _output() {
-    let output = "";
+    let output = " ";
     if (!this._leftStackIsEmpty()) {
       output = this._buildSpecialExpress(
         this.#leftOprendStack,
@@ -429,12 +451,72 @@ class calculator {
     return oprend;
   }
 
+  _updateDisplayInput(input) {
+    const calcDisplay = document.querySelector(".calc__text");
+
+    console.log(calcDisplay.clientWidth);
+    if (isFinite(input)) {
+      calcDisplay.textContent = bigDecimal.getPrettyValue(input);
+    } else {
+      calcDisplay.textContent = input;
+    }
+  }
+
+  _updateDisplayExpress(input) {
+    const calcDisplayExpress = document.querySelector(".calc__prev__text");
+    calcDisplayExpress.textContent = input;
+  }
+
   _updateSolvedState(bool) {
     this.#solvedFlag = bool;
   }
 
   _getSolvedState() {
     return this.#solvedFlag;
+  }
+
+  #setCurrentPosValue(value) {
+    this.#curExpression[this.#getPositionInExpression()] = value;
+  } // end setCurrentPosValue
+
+  #copyLeftOprendToRight() {
+    // copy left oprend to right oprend
+    this.#curExpression[2] = this.#curExpression[0];
+    // copy left oprend special operator stack to right stack
+    this.#rightOprendStack = [...this.#leftOprendStack];
+  } // end copyLeftOprendToRight
+  #getCurrentPosValue() {
+    return this.#curExpression[this.#getPositionInExpression()];
+  } // end #getCurrentPosValue
+  #getCurrentExpression() {
+    return this.#curExpression;
+  } // end getCurrentExpression
+
+  #resetExpression() {
+    this.#curExpression = [];
+  } // end #resetExpression
+  #setCurrentPosition(position) {
+    this.#curExpPos = position;
+  }
+  #getPositionInExpression() {
+    return this.#curExpPos;
+  } // end getCurrentPosition
+  #incremenetPosition() {
+    this.#curExpPos++;
+  } // end incremenetPosition
+
+  _leftStackIsEmpty() {
+    if (this.#leftOprendStack.length === 0) {
+      return true;
+    }
+    return false;
+  }
+
+  _rightStackIsEmpty() {
+    if (this.#rightOprendStack.length === 0) {
+      return true;
+    }
+    return false;
   }
 
   _addToHistry() {
@@ -449,20 +531,6 @@ class calculator {
     <div class="history__item--result">${this.#calcResult}</div></il>`;
 
     historyList.insertAdjacentHTML("afterbegin", html);
-  }
-
-  _leftStackIsEmpty() {
-    if (this.#leftOprendStack.length === 0) {
-      return true;
-    }
-    return false;
-  }
-
-  _rightStackIsEmpty() {
-    if (this.#rightOprendStack.length === 0) {
-      return true;
-    }
-    return false;
   }
 
   _clearHistory() {
